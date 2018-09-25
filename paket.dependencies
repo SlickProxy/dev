@@ -1,0 +1,10 @@
+source https://api.nuget.org/v3/index.json
+nuget Microsoft.Owin 4.0.0 
+nuget Microsoft.Owin.StaticFiles >= 2.1.0
+nuget Microsoft.Owin.FileSystems >= 2.1.0 
+nuget Microsoft.Owin.Host.SystemWeb 4.0.0  
+nuget Microsoft.AspNet.WebApi 5.2.4  
+nuget Microsoft.AspNet.WebApi.Client 5.2.4  
+nuget Microsoft.AspNet.WebApi.Core 5.2.4  
+nuget Microsoft.AspNet.WebApi.WebHost 5.2.4  
+nuget Microsoft.Owin.SelfHost

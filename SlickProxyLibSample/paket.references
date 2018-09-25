@@ -1,0 +1,8 @@
+Microsoft.Owin
+Microsoft.Owin.StaticFiles
+Microsoft.Owin.FileSystems
+Microsoft.AspNet.WebApi.WebHost
+Microsoft.Owin.Host.SystemWeb
+Microsoft.AspNet.WebApi.Client
+Microsoft.AspNet.WebApi
+Microsoft.Owin.SelfHost
