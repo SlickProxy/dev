@@ -18,7 +18,7 @@ namespace SlickProxyLibSample
             app.UseSlickProxy(
                 request =>
                 {
-                    request.When("/cdn/(.*)", req => $"{req.Scheme}://code.jquery.com/{req.Part(1)}");
+                    request.When("/cdn/(.*)", "/cdn/(.*)", req => $"{req.Scheme}://code.jquery.com/{req.Part(1)}");
                     request.OnRewriteStarted(
                         (f, t) => { Console.WriteLine($"Started from {f} to {t} ..."); });
                     request.OnRewriteEnded(
