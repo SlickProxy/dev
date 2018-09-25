@@ -15,7 +15,7 @@ namespace SlickProxyLibSample
     {
         public void Configuration(IAppBuilder app)
         {
-            app.UseProxy(
+            app.UseSlickProxy(
                 request =>
                 {
                     request.When("/cdn/(.*)", req => $"{req.Scheme}://code.jquery.com/{req.Part(1)}");

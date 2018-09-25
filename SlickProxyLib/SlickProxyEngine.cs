@@ -9,9 +9,9 @@
     using System.Threading.Tasks;
     using Owin;
 
-    public static class SxProxyEngine
+    public static class SlickProxyEngine
     {
-        public static void UseProxy(this IAppBuilder app, Action<OwinAppRequestInformation> when)
+        public static void UseSlickProxy(this IAppBuilder app, Action<OwinAppRequestInformation> when)
         {
             app.Use(
                 new Func<Func<IDictionary<string, object>, Task>, Func<IDictionary<string, object>, Task>>(
