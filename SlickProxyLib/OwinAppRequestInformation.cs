@@ -6,14 +6,15 @@
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading;
+    using Microsoft.Owin;
 
     public class OwinAppRequestInformation
     {
         public CancellationToken CancellationToken;
 
-        public OwinAppRequestInformation(IDictionary<string, object> owinRequestDictionary)
+        public OwinAppRequestInformation(IOwinContext context)
         {
-            this.OwinRequestDictionary = owinRequestDictionary;
+            this.OwinRequestDictionary = context.Environment;
             this.RequestBody = (Stream)this.OwinRequestDictionary["owin.RequestBody"];
             this.RequestHeaders = (IDictionary<string, string[]>)this.OwinRequestDictionary["owin.RequestHeaders"];
             this.Method = (string)this.OwinRequestDictionary["owin.RequestMethod"];
@@ -21,6 +22,10 @@
             this.PathBase = (string)this.OwinRequestDictionary["owin.RequestPathBase"];
             this.Protocol = (string)this.OwinRequestDictionary["owin.RequestProtocol"];
             this.QueryString = (string)this.OwinRequestDictionary["owin.RequestQueryString"];
+
+
+            this.QueryStringWithPrefix =string.IsNullOrEmpty(this.QueryString)?"": "?"+this.QueryString;
+
             this.Scheme = (string)this.OwinRequestDictionary["owin.RequestScheme"];
             this.ResponseBody = (Stream)this.OwinRequestDictionary["owin.ResponseBody"];
             this.ResponseHeaders = (IDictionary<string, string[]>)this.OwinRequestDictionary["owin.ResponseHeaders"];
@@ -42,6 +47,8 @@
 
             this.ProxyObject = new ProxyObjectWithPath(this, null);
         }
+
+        public string QueryStringWithPrefix { get; internal set; }
 
         public Stream ResponseBody { get; }
 
@@ -90,6 +97,7 @@
         internal Action<string, string> OnRewritingStarted { private set; get; }
 
         internal Action<string, string> OnRewritingEnded { private set; get; }
+        internal Action<string, string> OnRewriteToCurrentServer { private set; get; }
 
         internal Action<string, OwinAppRequestInformation, Exception> OnRewritingException { private set; get; }
 
@@ -140,6 +148,10 @@
             this.OnRewritingEnded = onAction;
         }
 
+        public void OnRewriteToCurrentHost(Action<string, string> onAction)
+        {
+            this.OnRewriteToCurrentServer = onAction;
+        }
         public void OnRewriteException(Action<string, OwinAppRequestInformation, Exception> onAction)
         {
             this.OnRewritingException = onAction;

@@ -1,5 +1,6 @@
 ﻿namespace SlickProxyLib
 {
+    using System;
     using System.Collections.Generic;
 
     public class ProxyObject
@@ -17,7 +18,15 @@
             this.RemoteIpAddress = request.RemoteIpAddress;
             this.RequestHeaders = request.RequestHeaders;
             this.Port = request.Port;
+            this.QueryStringWithPrefix = request. QueryStringWithPrefix;
+            this.ServeExtensionlessWithExtension = (extension) => $"{request.BaseAddressWithScheme}{request.Path}.{extension}{request.QueryStringWithPrefix}";
+            this.ServeExtensionlessWithExtensionAndDomain = (extension,baseAddressWithScheme) => $"{baseAddressWithScheme}{request.Path}.{extension}{request.QueryStringWithPrefix}";
+
         }
+
+        public Func<string, string> ServeExtensionlessWithExtension { get; internal set; }
+        public Func<string, string,string> ServeExtensionlessWithExtensionAndDomain { get; internal set; }
+        public string QueryStringWithPrefix { get; internal set; }
 
         public string Scheme { get; internal set; }
 

@@ -7,6 +7,7 @@
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Threading.Tasks;
+    using Microsoft.Owin;
     using Owin;
 
     public static class SlickProxyEngine
@@ -17,7 +18,10 @@
                 new Func<Func<IDictionary<string, object>, Task>, Func<IDictionary<string, object>, Task>>(
                     next => async env =>
                     {
-                        var requestInfo = new OwinAppRequestInformation(env);
+                        IOwinContext context = new OwinContext(env);
+                        var requestInfo = new OwinAppRequestInformation(context);
+                       
+                        
                         string from = requestInfo.Uri;
                         try
                         {
@@ -26,16 +30,30 @@
                             {
                                 requestInfo.OnRewritingStarted?.Invoke(from, requestInfo.RewriteToUrl);
 
-                                bool rewriteToSameServer = requestInfo.RewriteToUrl.StartsWith("http://" + requestInfo.HostNameWithPort + requestInfo.PathBase) ||
-                                    requestInfo.RewriteToUrl.StartsWith("https://" + requestInfo.HostNameWithPort + requestInfo.PathBase);
+                                Uri myUri = new Uri(requestInfo.RewriteToUrl);
 
+                                bool rewriteToSameServer = myUri.Host +":"+ myUri.Port == requestInfo.HostName + ":" + requestInfo.Port && (
+                                    requestInfo.RewriteToUrl.StartsWith("http://" + requestInfo.HostNameWithPort + requestInfo.Path) ||
+                                    requestInfo.RewriteToUrl.StartsWith("https://" + requestInfo.HostNameWithPort + requestInfo.Path)
+                                        );
+ 
                                 if (rewriteToSameServer)
-                                    Console.WriteLine("Not implemented.Some optimization needed for this as it is rewrite to same  current server");
-
-                                HttpContent stream = await env.SendAsync(from, requestInfo.RewriteToUrl, requestInfo.OnRewritingException);
-                                await stream.CopyToAsync(requestInfo.ResponseBody);
-                                requestInfo.OnRewritingEnded?.Invoke(from, requestInfo.RewriteToUrl);
-                                return;
+                                {
+                                    requestInfo. OnRewriteToCurrentServer?.Invoke(from, requestInfo.RewriteToUrl);
+                                   
+                                    var newPath= myUri.PathAndQuery;
+                                    context.Request.Path=new PathString(newPath);
+                                    requestInfo.OnRewritingEnded?.Invoke(from, requestInfo.RewriteToUrl);
+                                    await next.Invoke(env);
+                                }
+                                else
+                                {
+                                    HttpContent stream = await requestInfo.SendAsync(from, requestInfo.RewriteToUrl, requestInfo.OnRewritingException);
+                                    await stream.CopyToAsync(requestInfo.ResponseBody);
+                                    requestInfo.OnRewritingEnded?.Invoke(from, requestInfo.RewriteToUrl);
+                                    return;
+                                }
+                               
                             }
                         }
                         catch (Exception e)
@@ -49,9 +67,9 @@
         }
 
         //based on https://github.com/petermreid/buskerproxy/blob/master/BuskerProxy/Handlers/ProxyHandler.cs
-        public static async Task<HttpContent> SendAsync(this IDictionary<string, object> env, string from, string remote, Action<string, OwinAppRequestInformation, Exception> requestInfoOnRewritingException)
+        public static async Task<HttpContent> SendAsync(this OwinAppRequestInformation requestInfo, string from, string remote, Action<string, OwinAppRequestInformation, Exception> requestInfoOnRewritingException)
         {
-            var requestInfo = new OwinAppRequestInformation(env);
+         
             requestInfo.RewriteToUrl = remote;
             //requestInfo.CancellationToken;
             string clientIp = requestInfo.RemoteIpAddress;
