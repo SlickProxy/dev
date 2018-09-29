@@ -25,8 +25,15 @@
                             if (!string.IsNullOrEmpty(requestInfo.RewriteToUrl))
                             {
                                 requestInfo.OnRewritingStarted?.Invoke(from, requestInfo.RewriteToUrl);
+
+                                bool rewriteToSameServer = requestInfo.RewriteToUrl.StartsWith("http://" + requestInfo.HostNameWithPort + requestInfo.PathBase) ||
+                                    requestInfo.RewriteToUrl.StartsWith("https://" + requestInfo.HostNameWithPort + requestInfo.PathBase);
+
+                                if (rewriteToSameServer)
+                                    Console.WriteLine("Not implemented.Some optimization needed for this as it is rewrite to same  current server");
+
                                 HttpContent stream = await env.SendAsync(from, requestInfo.RewriteToUrl, requestInfo.OnRewritingException);
-                                await stream.CopyToAsync(requestInfo.Body);
+                                await stream.CopyToAsync(requestInfo.ResponseBody);
                                 requestInfo.OnRewritingEnded?.Invoke(from, requestInfo.RewriteToUrl);
                                 return;
                             }

@@ -9,77 +9,91 @@
 
     public class OwinAppRequestInformation
     {
-        public Stream Body;
         public CancellationToken CancellationToken;
-        public string Method;
-        public string OwinVersion;
-        public string Path;
-        public string PathBase;
-        public string Protocol;
-        public string QueryString;
-        public Stream RequestBody;
-        public IDictionary<string, string[]> RequestHeaders;
-        public string Res;
-        public IDictionary<string, string[]> ResponseHeaders;
-        public string Scheme;
-        public string Uri;
 
-        public OwinAppRequestInformation(IDictionary<string, object> env)
+        public OwinAppRequestInformation(IDictionary<string, object> owinRequestDictionary)
         {
-            //request.When("/cdn/(.*)", "/cdn/(.*)", (req) => $"{req.Scheme}://{req.BaseAddress}/{req.Path}");
-            this.RequestBody = (Stream)env["owin.RequestBody"];
-            this.RequestHeaders = (IDictionary<string, string[]>)env["owin.RequestHeaders"];
-            this.Method = (string)env["owin.RequestMethod"];
-            this.Path = (string)env["owin.RequestPath"];
-            this.PathBase = (string)env["owin.RequestPathBase"];
-            this.Protocol = (string)env["owin.RequestProtocol"];
-            this.QueryString = (string)env["owin.RequestQueryString"];
-            this.Scheme = (string)env["owin.RequestScheme"];
-            this.Body = (Stream)env["owin.ResponseBody"];
-            this.ResponseHeaders = (IDictionary<string, string[]>)env["owin.ResponseHeaders"];
-            this.OwinVersion = (string)env["owin.Version"];
-            this.CancellationToken = (CancellationToken)env["owin.CallCancelled"];
-            this.BaseAddress = (string)env["owin.RequestScheme"] + "://" + this.RequestHeaders["Host"].First() +
-                (string)env["owin.RequestPathBase"];
-            this.Uri = this.BaseAddress + (string)env["owin.RequestPath"];
-            this.RemoteIpAddress = (string)env["server.RemoteIpAddress"];
-            if (env["owin.RequestQueryString"] != "")
-                this.Uri += "?" + (string)env["owin.RequestQueryString"];
+            this.OwinRequestDictionary = owinRequestDictionary;
+            this.RequestBody = (Stream)this.OwinRequestDictionary["owin.RequestBody"];
+            this.RequestHeaders = (IDictionary<string, string[]>)this.OwinRequestDictionary["owin.RequestHeaders"];
+            this.Method = (string)this.OwinRequestDictionary["owin.RequestMethod"];
+            this.Path = (string)this.OwinRequestDictionary["owin.RequestPath"];
+            this.PathBase = (string)this.OwinRequestDictionary["owin.RequestPathBase"];
+            this.Protocol = (string)this.OwinRequestDictionary["owin.RequestProtocol"];
+            this.QueryString = (string)this.OwinRequestDictionary["owin.RequestQueryString"];
+            this.Scheme = (string)this.OwinRequestDictionary["owin.RequestScheme"];
+            this.ResponseBody = (Stream)this.OwinRequestDictionary["owin.ResponseBody"];
+            this.ResponseHeaders = (IDictionary<string, string[]>)this.OwinRequestDictionary["owin.ResponseHeaders"];
+            this.OwinVersion = (string)this.OwinRequestDictionary["owin.Version"];
+            this.CancellationToken = (CancellationToken)this.OwinRequestDictionary["owin.CallCancelled"];
+
+            this.HostNameWithPort = this.RequestHeaders["Host"].First();
+            string[] parts = this.HostNameWithPort.Split(':');
+            this.Port = parts.Length == 1 ? "80" : parts[1];
+            this.HostName = parts[0];
+
+            this.BaseAddressWithScheme = this.Scheme + "://" + this.HostNameWithPort + this.PathBase;
+            this.Uri = this.BaseAddressWithScheme + (string)this.OwinRequestDictionary["owin.RequestPath"];
+            this.RemoteIpAddress = (string)this.OwinRequestDictionary["server.RemoteIpAddress"];
+            if (this.OwinRequestDictionary["owin.RequestQueryString"] != "")
+                this.Uri += "?" + (string)this.OwinRequestDictionary["owin.RequestQueryString"];
 
             this.Res = $"{this.Method} {this.Uri}";
 
-            this.ProxyObject = new ProxyObject
-            {
-                BaseAddress = this.BaseAddress,
-                Path = this.Path,
-                Scheme = this.Scheme,
-                Part = i => "",
-                Method = this.Method,
-                Protocol = this.Protocol,
-                QueryString = this.QueryString,
-                Port = this.Port
-            };
+            this.ProxyObject = new ProxyObjectWithPath(this, null);
         }
 
-        public string Port { get; set; }
+        public Stream ResponseBody { get; }
 
-        public string RemoteIpAddress { get; set; }
+        public string Method { get; }
 
-        public string BaseAddress { get; set; }
+        public string OwinVersion { get; }
+
+        public string Path { get; }
+
+        public string PathBase { get; }
+
+        public string Protocol { get; }
+
+        public string QueryString { get; }
+
+        public Stream RequestBody { get; }
+
+        public IDictionary<string, string[]> RequestHeaders { get; }
+
+        public string Res { get; }
+
+        public IDictionary<string, string[]> ResponseHeaders { get; }
+
+        public string Scheme { get; }
+
+        public string Uri { get; }
+
+        IDictionary<string, object> OwinRequestDictionary { get; }
+
+        public string HostName { get; }
+
+        public string HostNameWithPort { get; }
+
+        public string Port { get; }
+
+        public string RemoteIpAddress { get; }
+
+        public string BaseAddressWithScheme { get; }
 
         internal string RewriteToUrl { get; set; }
 
-        internal bool IsMatched { set; get; }
+        internal bool IsMatched { set; private get; }
 
-        ProxyObject ProxyObject { get; }
+        ProxyObjectWithPath ProxyObject { get; }
 
-        internal Action<string, string> OnRewritingStarted { set; get; }
+        internal Action<string, string> OnRewritingStarted { private set; get; }
 
-        internal Action<string, string> OnRewritingEnded { set; get; }
+        internal Action<string, string> OnRewritingEnded { private set; get; }
 
-        internal Action<string, OwinAppRequestInformation, Exception> OnRewritingException { set; get; }
+        internal Action<string, OwinAppRequestInformation, Exception> OnRewritingException { private set; get; }
 
-        public void When(Func<ProxyObject, bool> test, Func<ProxyObject, string> apply)
+        public void When(Func<ProxyObjectWithPath, bool> test, Func<ProxyObject, string> apply)
         {
             if (this.IsMatched)
                 return;
@@ -87,18 +101,7 @@
             if (test(this.ProxyObject))
             {
                 this.IsMatched = true;
-                string to = apply(
-                    new ProxyObject
-                    {
-                        BaseAddress = this.BaseAddress,
-                        Path = this.Path,
-                        Scheme = this.Scheme,
-                        Part = i => "",
-                        Method = this.Method,
-                        Protocol = this.Protocol,
-                        QueryString = this.QueryString,
-                        Port = this.Port
-                    });
+                string to = apply(new ProxyObjectWithPath(this, null));
                 this.RewriteToUrl = to;
             }
         }
@@ -113,7 +116,7 @@
             this.When(m, m, apply);
         }
 
-        public void When(string m, string m2, Func<ProxyObject, string> apply)
+        public void When(string m, string m2, Func<ProxyObjectWithPath, string> apply)
         {
             if (this.IsMatched)
                 return;
@@ -122,18 +125,7 @@
             if (match.Success)
             {
                 this.IsMatched = true;
-                string to = apply(
-                    new ProxyObject
-                    {
-                        BaseAddress = this.BaseAddress,
-                        Path = this.Path,
-                        Scheme = this.Scheme,
-                        Part = i => rep.Groups[i].Value,
-                        Method = this.Method,
-                        Protocol = this.Protocol,
-                        QueryString = this.QueryString,
-                        Port = this.Port
-                    });
+                string to = apply(new ProxyObjectWithPath(this, i => rep.Groups[i].Value));
                 this.RewriteToUrl = to;
             }
         }
