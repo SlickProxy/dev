@@ -23,8 +23,7 @@
             this.Protocol = (string)this.OwinRequestDictionary["owin.RequestProtocol"];
             this.QueryString = (string)this.OwinRequestDictionary["owin.RequestQueryString"];
 
-
-            this.QueryStringWithPrefix =string.IsNullOrEmpty(this.QueryString)?"": "?"+this.QueryString;
+            this.QueryStringWithPrefix = string.IsNullOrEmpty(this.QueryString) ? "" : "?" + this.QueryString;
 
             this.Scheme = (string)this.OwinRequestDictionary["owin.RequestScheme"];
             this.ResponseBody = (Stream)this.OwinRequestDictionary["owin.ResponseBody"];
@@ -37,16 +36,32 @@
             this.Port = parts.Length == 1 ? "80" : parts[1];
             this.HostName = parts[0];
 
+            this.BaseAddressWithoutScheme = this.HostNameWithPort + this.PathBase;
             this.BaseAddressWithScheme = this.Scheme + "://" + this.HostNameWithPort + this.PathBase;
+
+            this.UriWithoutScheme = this.BaseAddressWithoutScheme + (string)this.OwinRequestDictionary["owin.RequestPath"];
             this.Uri = this.BaseAddressWithScheme + (string)this.OwinRequestDictionary["owin.RequestPath"];
             this.RemoteIpAddress = (string)this.OwinRequestDictionary["server.RemoteIpAddress"];
+
+            this.PathAndQuery = (string)this.OwinRequestDictionary["owin.RequestPath"];
+
             if (this.OwinRequestDictionary["owin.RequestQueryString"] != "")
+            {
                 this.Uri += "?" + (string)this.OwinRequestDictionary["owin.RequestQueryString"];
+                this.UriWithoutScheme += "?" + (string)this.OwinRequestDictionary["owin.RequestQueryString"];
+                this.PathAndQuery += "?" + (string)this.OwinRequestDictionary["owin.RequestQueryString"];
+            }
 
             this.Res = $"{this.Method} {this.Uri}";
 
             this.ProxyObject = new ProxyObjectWithPath(this, null);
         }
+
+        public string PathAndQuery { get; internal set; }
+
+        public string BaseAddressWithoutScheme { get; internal set; }
+
+        public string UriWithoutScheme { get; internal set; }
 
         public string QueryStringWithPrefix { get; internal set; }
 
@@ -90,14 +105,17 @@
 
         internal string RewriteToUrl { get; set; }
 
-        internal bool IsMatched { set; private get; }
+        internal bool IsMatched { private set; get; }
 
-        ProxyObjectWithPath ProxyObject { get; }
+        internal ProxyObjectWithPath ProxyObject { get; set; }
 
         internal Action<string, string> OnRewritingStarted { private set; get; }
 
         internal Action<string, string> OnRewritingEnded { private set; get; }
+
         internal Action<string, string> OnRewriteToCurrentServer { private set; get; }
+
+        internal Action<string, string> OnRedirectTo { private set; get; }
 
         internal Action<string, OwinAppRequestInformation, Exception> OnRewritingException { private set; get; }
 
@@ -108,9 +126,9 @@
 
             if (test(this.ProxyObject))
             {
-                this.IsMatched = true;
-                string to = apply(new ProxyObjectWithPath(this, null));
+                string to = apply(this.ProxyObject);
                 this.RewriteToUrl = to;
+                this.IsMatched = true;
             }
         }
 
@@ -124,6 +142,30 @@
             this.When(m, m, apply);
         }
 
+        public void When(string m, Action<ProxyObject> apply)
+        {
+            this.When(
+                m,
+                m,
+                r =>
+                {
+                    apply?.Invoke(r);
+                    return null;
+                });
+        }
+
+        public void When(Func<ProxyObjectWithPath, bool> test, Action<ProxyObject> apply)
+        {
+            if (this.IsMatched)
+                return;
+
+            if (test(this.ProxyObject))
+            {
+                apply(this.ProxyObject);
+                this.IsMatched = true;
+            }
+        }
+
         public void When(string m, string m2, Func<ProxyObjectWithPath, string> apply)
         {
             if (this.IsMatched)
@@ -132,9 +174,10 @@
             Match rep = Regex.Match(this.Uri, m2);
             if (match.Success)
             {
-                this.IsMatched = true;
-                string to = apply(new ProxyObjectWithPath(this, i => rep.Groups[i].Value));
+                this.ProxyObject = new ProxyObjectWithPath(this, i => rep.Groups[i].Value);
+                string to = apply(this.ProxyObject);
                 this.RewriteToUrl = to;
+                this.IsMatched = true;
             }
         }
 
@@ -152,6 +195,12 @@
         {
             this.OnRewriteToCurrentServer = onAction;
         }
+
+        public void OnRedirect(Action<string, string> onAction)
+        {
+            this.OnRedirectTo = onAction;
+        }
+
         public void OnRewriteException(Action<string, OwinAppRequestInformation, Exception> onAction)
         {
             this.OnRewritingException = onAction;

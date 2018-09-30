@@ -11,7 +11,7 @@
                 part = i => "";
 
             this.Part = part;
-         }
+        }
 
         public Func<int, string> Part { get; internal set; }
     }

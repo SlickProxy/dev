@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("SlickProxyLib")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Reverse Proxy written as OWIN Middleware")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Sam Bamgboye")]
 [assembly: AssemblyProduct("SlickProxyLib")]
-[assembly: AssemblyCopyright("Copyright ©  2018")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCopyright("Copyright Sam Bamgboye ©  2018")]
+[assembly: AssemblyTrademark("Sam Bamgboye")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
