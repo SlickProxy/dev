@@ -14,5 +14,7 @@
         }
 
         public Func<int, string> Part { get; internal set; }
+
+       
     }
 }

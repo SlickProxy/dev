@@ -60,6 +60,14 @@
             this.PathAndQuery = request.PathAndQuery;
         }
 
+        public string UseReferer(string referer,string route)
+        {
+            Referer = referer;
+            return route;
+        }
+
+
+        internal string Referer { get; set; }
         public string PathAndQuery { get; internal set; }
 
         public string BaseAddressWithoutScheme { get; internal set; }

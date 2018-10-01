@@ -71,7 +71,7 @@
                                 }
                                 else
                                 {
-                                    HttpContent stream = await requestInfo.SendAsync(from, requestInfo.RewriteToUrl, requestInfo.OnRewritingException);
+                                    HttpContent stream = await requestInfo.SendAsync(from, requestInfo.RewriteToUrl, requestInfo.OnRewritingException, requestInfo.ProxyObject.Referer);
                                     await stream.CopyToAsync(requestInfo.ResponseBody);
                                     requestInfo.OnRewritingEnded?.Invoke(from, requestInfo.RewriteToUrl);
                                     return;
@@ -89,7 +89,7 @@
         }
 
         //based on https://github.com/petermreid/buskerproxy/blob/master/BuskerProxy/Handlers/ProxyHandler.cs
-        public static async Task<HttpContent> SendAsync(this OwinAppRequestInformation requestInfo, string from, string remote, Action<string, OwinAppRequestInformation, Exception> requestInfoOnRewritingException)
+        public static async Task<HttpContent> SendAsync(this OwinAppRequestInformation requestInfo, string from, string remote, Action<string, OwinAppRequestInformation, Exception> requestInfoOnRewritingException,string referer)
         {
             requestInfo.RewriteToUrl = remote;
             //requestInfo.CancellationToken;
@@ -97,10 +97,15 @@
 
             HttpRequestMessage request = OwinRequestToHttpRequestMessage(requestInfo);
 
+            
             var client = new HttpClient();
             try
             {
                 request.Headers.Add("X-Forwarded-For", clientIp);
+                if (!string.IsNullOrEmpty(referer))
+                {
+                    request.Headers.Add("Referer", referer);
+                }
                 //Trace.TraceInformation("Request To:{0}", request.RequestUri.ToString());
                 HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
                 response.Headers.Via.Add(new ViaHeaderValue("1.1", "SignalXProxy", "http"));

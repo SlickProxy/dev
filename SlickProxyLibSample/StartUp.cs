@@ -32,6 +32,7 @@ namespace SlickProxyLibSample
             app.UseSlickProxy(
                 request =>
                 {
+                    request.When(req => req.Path.EndsWith("/boo"), req => req.UseReferer($"{req.BaseAddressWithScheme}", req.ExtensionlessWithExtension("html")));
                     request.When(req => req.Path.EndsWith("/index"), req => req.ExtensionlessWithExtension("html"));
                     request.When(req => req.Path.EndsWith("/indexString"), req => req.RespondWithString("what's up men!"));
                     request.When(req => req.Path.EndsWith("/indexObject"), req => req.RespondWithObjectAsJson(DateTime.UtcNow));

@@ -119,6 +119,8 @@
 
         internal Action<string, OwinAppRequestInformation, Exception> OnRewritingException { private set; get; }
 
+  
+
         public void When(Func<ProxyObjectWithPath, bool> test, Func<ProxyObject, string> apply)
         {
             if (this.IsMatched)
