@@ -71,7 +71,7 @@
                                 }
                                 else
                                 {
-                                    HttpContent stream = await requestInfo.SendAsync(from, requestInfo.RewriteToUrl, requestInfo.OnRewritingException, requestInfo.ProxyObject.Referer);
+                                    HttpContent stream = await requestInfo.SendAsync(from, requestInfo.RewriteToUrl, requestInfo.OnRewritingException, requestInfo.ProxyObject.Referer, requestInfo.ProxyObject.RequestHeadersChanges);
                                     await stream.CopyToAsync(requestInfo.ResponseBody);
                                     requestInfo.OnRewritingEnded?.Invoke(from, requestInfo.RewriteToUrl);
                                     return;
@@ -89,7 +89,7 @@
         }
 
         //based on https://github.com/petermreid/buskerproxy/blob/master/BuskerProxy/Handlers/ProxyHandler.cs
-        public static async Task<HttpContent> SendAsync(this OwinAppRequestInformation requestInfo, string from, string remote, Action<string, OwinAppRequestInformation, Exception> requestInfoOnRewritingException,string referer)
+        public static async Task<HttpContent> SendAsync(this OwinAppRequestInformation requestInfo, string from, string remote, Action<string, OwinAppRequestInformation, Exception> requestInfoOnRewritingException, string referer, IDictionary<string, string> headers)
         {
             requestInfo.RewriteToUrl = remote;
             //requestInfo.CancellationToken;
@@ -97,15 +97,27 @@
 
             HttpRequestMessage request = OwinRequestToHttpRequestMessage(requestInfo);
 
-            
             var client = new HttpClient();
             try
             {
                 request.Headers.Add("X-Forwarded-For", clientIp);
+
+                foreach (KeyValuePair<string, string> keyValuePair in headers)
+                    if (!string.IsNullOrEmpty(keyValuePair.Key) && !string.IsNullOrEmpty(keyValuePair.Value))
+                    {
+                        if (request.Headers.Contains(keyValuePair.Key))
+                            request.Headers.Remove(keyValuePair.Key);
+                        request.Headers.Add(keyValuePair.Key, keyValuePair.Value);
+                    }
+
                 if (!string.IsNullOrEmpty(referer))
                 {
+                    if (request.Headers.Contains("Referer"))
+                        request.Headers.Remove("Referer");
                     request.Headers.Add("Referer", referer);
+                    //request.Headers.Referrer = new Uri(referer);
                 }
+
                 //Trace.TraceInformation("Request To:{0}", request.RequestUri.ToString());
                 HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
                 response.Headers.Via.Add(new ViaHeaderValue("1.1", "SignalXProxy", "http"));

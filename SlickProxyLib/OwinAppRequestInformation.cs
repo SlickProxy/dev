@@ -11,9 +11,10 @@
     public class OwinAppRequestInformation
     {
         public CancellationToken CancellationToken;
-
+        IOwinContext Context;
         public OwinAppRequestInformation(IOwinContext context)
         {
+            Context = context;
             this.OwinRequestDictionary = context.Environment;
             this.RequestBody = (Stream)this.OwinRequestDictionary["owin.RequestBody"];
             this.RequestHeaders = (IDictionary<string, string[]>)this.OwinRequestDictionary["owin.RequestHeaders"];
@@ -54,7 +55,7 @@
 
             this.Res = $"{this.Method} {this.Uri}";
 
-            this.ProxyObject = new ProxyObjectWithPath(this, null);
+            this.ProxyObject = new ProxyObjectWithPath(this, null, context);
         }
 
         public string PathAndQuery { get; internal set; }
@@ -119,8 +120,6 @@
 
         internal Action<string, OwinAppRequestInformation, Exception> OnRewritingException { private set; get; }
 
-  
-
         public void When(Func<ProxyObjectWithPath, bool> test, Func<ProxyObject, string> apply)
         {
             if (this.IsMatched)
@@ -176,7 +175,7 @@
             Match rep = Regex.Match(this.Uri, m2);
             if (match.Success)
             {
-                this.ProxyObject = new ProxyObjectWithPath(this, i => rep.Groups[i].Value);
+                this.ProxyObject = new ProxyObjectWithPath(this, i => rep.Groups[i].Value, Context);
                 string to = apply(this.ProxyObject);
                 this.RewriteToUrl = to;
                 this.IsMatched = true;

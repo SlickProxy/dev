@@ -2,11 +2,13 @@
 {
     using System;
     using System.Collections.Generic;
+    using Microsoft.Owin;
 
     public class ProxyObject
     {
-        public ProxyObject(OwinAppRequestInformation request)
+        public ProxyObject(OwinAppRequestInformation request, IOwinContext context)
         {
+            this.Context = context;
             this.BaseAddressWithScheme = request.BaseAddressWithScheme;
             this.Path = request.Path;
             this.Scheme = request.Scheme;
@@ -60,14 +62,12 @@
             this.PathAndQuery = request.PathAndQuery;
         }
 
-        public string UseReferer(string referer,string route)
-        {
-            Referer = referer;
-            return route;
-        }
+        IOwinContext Context { get; }
 
+        internal IDictionary<string, string> RequestHeadersChanges { get; set; }
 
         internal string Referer { get; set; }
+
         public string PathAndQuery { get; internal set; }
 
         public string BaseAddressWithoutScheme { get; internal set; }
@@ -124,5 +124,19 @@
         public string AsHttps => $"https://{this.UriWithoutScheme}";
 
         public string AsHttp => $"http://{this.UriWithoutScheme}";
+
+        public string UseReferer(string referer, string route)
+        {
+            this.Referer = referer;
+            return route;
+        }
+
+        public string UseRequestHeaders(Action<IDictionary<string, string>> headers, string route)
+        {
+            var hdrs = (IDictionary<string, string>)this.Context.Environment["owin.RequestHeaders"];
+            headers(hdrs);
+            this.RequestHeadersChanges = hdrs;
+            return route;
+        }
     }
 }
