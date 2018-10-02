@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Net.Http;
     using System.Text.RegularExpressions;
     using System.Threading;
     using Microsoft.Owin;
@@ -11,10 +12,11 @@
     public class OwinAppRequestInformation
     {
         public CancellationToken CancellationToken;
-        IOwinContext Context;
+        readonly IOwinContext Context;
+
         public OwinAppRequestInformation(IOwinContext context)
         {
-            Context = context;
+            this.Context = context;
             this.OwinRequestDictionary = context.Environment;
             this.RequestBody = (Stream)this.OwinRequestDictionary["owin.RequestBody"];
             this.RequestHeaders = (IDictionary<string, string[]>)this.OwinRequestDictionary["owin.RequestHeaders"];
@@ -110,15 +112,21 @@
 
         internal ProxyObjectWithPath ProxyObject { get; set; }
 
-        internal Action<string, string> OnRewritingStarted { private set; get; }
+        internal Action<string, string, bool> OnRewritingStarted { private set; get; }
 
-        internal Action<string, string> OnRewritingEnded { private set; get; }
+        internal Action<string, string> OnProcessingEnded { private set; get; }
 
         internal Action<string, string> OnRewriteToCurrentServer { private set; get; }
 
         internal Action<string, string> OnRedirectTo { private set; get; }
 
-        internal Action<string, OwinAppRequestInformation, Exception> OnRewritingException { private set; get; }
+        internal Action<string, string, HttpRequestMessage, Exception> OnRewritingException { private set; get; }
+
+        internal Action<string, string> OnRewriteToDifferentServer { get; set; }
+
+        internal Action<string> OnNoMatching { get; set; }
+
+        internal Action<string, string, HttpRequestMessage, HttpResponseMessage, Exception> OnRespondingFromRemoteServer { get; set; }
 
         public void When(Func<ProxyObjectWithPath, bool> test, Func<ProxyObject, string> apply)
         {
@@ -175,21 +183,31 @@
             Match rep = Regex.Match(this.Uri, m2);
             if (match.Success)
             {
-                this.ProxyObject = new ProxyObjectWithPath(this, i => rep.Groups[i].Value, Context);
+                this.ProxyObject = new ProxyObjectWithPath(this, i => rep.Groups[i].Value, this.Context);
                 string to = apply(this.ProxyObject);
                 this.RewriteToUrl = to;
                 this.IsMatched = true;
             }
         }
 
-        public void OnRewriteStarted(Action<string, string> onAction)
+        public void OnRewriteStarted(Action<string, string, bool> onAction)
         {
             this.OnRewritingStarted = onAction;
         }
 
         public void OnRewriteEnded(Action<string, string> onAction)
         {
-            this.OnRewritingEnded = onAction;
+            this.OnProcessingEnded = onAction;
+        }
+
+        public void OnNoMatch(Action<string> onAction)
+        {
+            this.OnNoMatching = onAction;
+        }
+
+        public void OnResponseFromRemoteServer(Action<string, string, HttpRequestMessage, HttpResponseMessage, Exception> onAction)
+        {
+            this.OnRespondingFromRemoteServer = onAction;
         }
 
         public void OnRewriteToCurrentHost(Action<string, string> onAction)
@@ -197,12 +215,17 @@
             this.OnRewriteToCurrentServer = onAction;
         }
 
+        public void OnRewriteToDifferentHost(Action<string, string> onAction)
+        {
+            this.OnRewriteToDifferentServer = onAction;
+        }
+
         public void OnRedirect(Action<string, string> onAction)
         {
             this.OnRedirectTo = onAction;
         }
 
-        public void OnRewriteException(Action<string, OwinAppRequestInformation, Exception> onAction)
+        public void OnRewriteException(Action<string, string, HttpRequestMessage, Exception> onAction)
         {
             this.OnRewritingException = onAction;
         }

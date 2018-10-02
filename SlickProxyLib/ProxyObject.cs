@@ -60,6 +60,7 @@
             this.BaseAddressWithoutScheme = request.BaseAddressWithoutScheme;
             this.UriWithoutScheme = request.UriWithoutScheme;
             this.PathAndQuery = request.PathAndQuery;
+            this.RequestHeadersChanges = new Dictionary<string, string>();
         }
 
         IOwinContext Context { get; }
