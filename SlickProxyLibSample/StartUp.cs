@@ -37,8 +37,7 @@ namespace SlickProxyLibSample
                 RouteSameServerRewritesOverNetwork = false
             };
 
-            app.UseSlickProxy(
-                handle =>
+            app.UseSlickProxy(handle =>
                 {
                     handle.When(request => request.Path.EndsWith("/boo"), request => request.UseReferer($"{request.BaseAddressWithScheme}", request.ExtensionlessWithExtension("html")));
                     handle.When(request => request.Path.EndsWith("/boo"), request => request.UseRequestHeaders(headers => headers["Referer"] = $"{request.BaseAddressWithScheme}", request.ExtensionlessWithExtension("html")));
@@ -60,8 +59,7 @@ namespace SlickProxyLibSample
                     var list = new List<string>
                         { "" };
                     handle.When("/scene(.*)", req => list.Contains(req.QueryStringValueByName("link")), req => $"{req.BaseAddressWithScheme}");
-                },
-                settings);
+                },settings);
 
             //this will run regardless of any previous match
             settings.RequireAuthenticationWhen("helloSir(.*)");
