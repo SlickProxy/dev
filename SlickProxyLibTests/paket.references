@@ -1,0 +1,5 @@
+MSTest.TestFramework
+MSTest.TestAdapter
+Microsoft.AspNet.WebApi.Client
+Microsoft.AspNet.WebApi
+Microsoft.Owin.SelfHost

@@ -1,21 +1,23 @@
 ﻿namespace SlickProxyLib
 {
+    using Microsoft.Owin;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Net.Http;
-    using System.Text.RegularExpressions;
     using System.Threading;
-    using Microsoft.Owin;
 
     public class OwinAppRequestInformation
     {
-        public CancellationToken CancellationToken;
-        readonly IOwinContext Context;
+        internal readonly IOwinContext Context;
+        internal CancellationToken CancellationToken;
 
-        public OwinAppRequestInformation(IOwinContext context)
+        internal OwinAppRequestInformation(IOwinContext context, SlickProxySettings settings)
         {
+            if (context == null)
+                return;
+            this.CopySettings(settings);
+
             this.Context = context;
             this.OwinRequestDictionary = context.Environment;
             this.RequestBody = (Stream)this.OwinRequestDictionary["owin.RequestBody"];
@@ -57,177 +59,108 @@
 
             this.Res = $"{this.Method} {this.Uri}";
 
+            var queryStringParams = new List<QueryStringParam>();
+            foreach (string s in this.QueryString.Split('&'))
+            {
+                string[] pt = s.Split('=');
+                if (pt.Length <= 1)
+                    continue;
+                string name = pt[0];
+                string val = pt[1];
+                queryStringParams.Add(new QueryStringParam(name, val));
+            }
+
+            this.QueryParams = queryStringParams;
+
+            //last thing to be set
             this.ProxyObject = new ProxyObjectWithPath(this, null, context);
         }
 
-        public string PathAndQuery { get; internal set; }
+        internal SlickProxySettings Settings { set; get; }
 
-        public string BaseAddressWithoutScheme { get; internal set; }
+        /// <summary>
+        ///     Has slash prefix
+        /// </summary>
+        internal string PathAndQuery { get; set; }
 
-        public string UriWithoutScheme { get; internal set; }
+        internal string BaseAddressWithoutScheme { get; set; }
 
-        public string QueryStringWithPrefix { get; internal set; }
+        internal string UriWithoutScheme { get; set; }
 
-        public Stream ResponseBody { get; }
+        internal string QueryStringWithPrefix { get; set; }
 
-        public string Method { get; }
+        internal Stream ResponseBody { get; }
 
-        public string OwinVersion { get; }
+        internal string Method { get; }
 
-        public string Path { get; }
+        internal string OwinVersion { get; }
 
-        public string PathBase { get; }
+        internal string Path { get; }
 
-        public string Protocol { get; }
+        internal string PathBase { get; }
 
-        public string QueryString { get; }
+        internal string Protocol { get; }
 
-        public Stream RequestBody { get; }
+        internal string QueryString { get; }
 
-        public IDictionary<string, string[]> RequestHeaders { get; }
+        internal Stream RequestBody { get; }
 
-        public string Res { get; }
+        internal IDictionary<string, string[]> RequestHeaders { get; }
 
-        public IDictionary<string, string[]> ResponseHeaders { get; }
+        internal string Res { get; }
 
-        public string Scheme { get; }
+        internal IDictionary<string, string[]> ResponseHeaders { get; }
 
-        public string Uri { get; }
+        internal string Scheme { get; }
 
-        IDictionary<string, object> OwinRequestDictionary { get; }
+        internal string Uri { get; }
 
-        public string HostName { get; }
+        private IDictionary<string, object> OwinRequestDictionary { get; }
 
-        public string HostNameWithPort { get; }
+        internal string HostName { get; }
 
-        public string Port { get; }
+        internal string HostNameWithPort { get; }
 
-        public string RemoteIpAddress { get; }
+        internal string Port { get; }
 
-        public string BaseAddressWithScheme { get; }
+        internal string RemoteIpAddress { get; }
+
+        internal string BaseAddressWithScheme { get; }
 
         internal string RewriteToUrl { get; set; }
 
-        internal bool IsMatched { private set; get; }
+        internal bool IsMatched { set; get; }
 
         internal ProxyObjectWithPath ProxyObject { get; set; }
 
-        internal Action<string, string, bool> OnRewritingStarted { private set; get; }
+        internal Action<string> OnAllowedToContinue { get; set; }
 
-        internal Action<string, string> OnProcessingEnded { private set; get; }
+        internal bool RequireAuthentication { set; get; }
 
-        internal Action<string, string> OnRewriteToCurrentServer { private set; get; }
+        internal List<QueryStringParam> QueryParams { get; set; }
 
-        internal Action<string, string> OnRedirectTo { private set; get; }
+        internal string ResponseContentHeadersContentType { get; set; }
 
-        internal Action<string, string, HttpRequestMessage, Exception> OnRewritingException { private set; get; }
-
-        internal Action<string, string> OnRewriteToDifferentServer { get; set; }
-
-        internal Action<string> OnNoMatching { get; set; }
-
-        internal Action<string, string, HttpRequestMessage, HttpResponseMessage, Exception> OnRespondingFromRemoteServer { get; set; }
-
-        public void When(Func<ProxyObjectWithPath, bool> test, Func<ProxyObject, string> apply)
+        private void CopySettings(SlickProxySettings settings)
         {
-            if (this.IsMatched)
-                return;
-
-            if (test(this.ProxyObject))
+            this.Settings = new SlickProxySettings
             {
-                string to = apply(this.ProxyObject);
-                this.RewriteToUrl = to;
-                this.IsMatched = true;
-            }
-        }
+                CaseSensitive = settings.CaseSensitive,
+                RequireAuthenticationWhenRouting = settings.RequireAuthenticationWhenRouting,
+                RequireAuthenticationWhenRouting2 = settings.RequireAuthenticationWhenRouting2,
+                RouteSameServerRewritesOverNetwork = settings.RouteSameServerRewritesOverNetwork,
+                OnRewriteToCurrentServer = settings.OnRewriteToCurrentServer,
+                OnNoMatching = settings.OnNoMatching,
+                OnRewriteToDifferentServer = settings.OnRewriteToDifferentServer,
+                OnRedirectTo = settings.OnRedirectTo,
+                OnRespondingFromRemoteServer = settings.OnRespondingFromRemoteServer,
+                OnRewritingException = settings.OnRewritingException,
+                OnProcessingEnded = settings.OnProcessingEnded,
+                OnRewritingStarted = settings.OnRewritingStarted,
+                OnRouteBlocking = settings.OnRouteBlocking,
 
-        public void WhenAny(Func<ProxyObject, string> apply)
-        {
-            this.When("(*.)", apply);
-        }
-
-        public void When(string m, Func<ProxyObject, string> apply)
-        {
-            this.When(m, m, apply);
-        }
-
-        public void When(string m, Action<ProxyObject> apply)
-        {
-            this.When(
-                m,
-                m,
-                r =>
-                {
-                    apply?.Invoke(r);
-                    return null;
-                });
-        }
-
-        public void When(Func<ProxyObjectWithPath, bool> test, Action<ProxyObject> apply)
-        {
-            if (this.IsMatched)
-                return;
-
-            if (test(this.ProxyObject))
-            {
-                apply(this.ProxyObject);
-                this.IsMatched = true;
-            }
-        }
-
-        public void When(string m, string m2, Func<ProxyObjectWithPath, string> apply)
-        {
-            if (this.IsMatched)
-                return;
-            Match match = Regex.Match(this.Uri, m);
-            Match rep = Regex.Match(this.Uri, m2);
-            if (match.Success)
-            {
-                this.ProxyObject = new ProxyObjectWithPath(this, i => rep.Groups[i].Value, this.Context);
-                string to = apply(this.ProxyObject);
-                this.RewriteToUrl = to;
-                this.IsMatched = true;
-            }
-        }
-
-        public void OnRewriteStarted(Action<string, string, bool> onAction)
-        {
-            this.OnRewritingStarted = onAction;
-        }
-
-        public void OnRewriteEnded(Action<string, string> onAction)
-        {
-            this.OnProcessingEnded = onAction;
-        }
-
-        public void OnNoMatch(Action<string> onAction)
-        {
-            this.OnNoMatching = onAction;
-        }
-
-        public void OnResponseFromRemoteServer(Action<string, string, HttpRequestMessage, HttpResponseMessage, Exception> onAction)
-        {
-            this.OnRespondingFromRemoteServer = onAction;
-        }
-
-        public void OnRewriteToCurrentHost(Action<string, string> onAction)
-        {
-            this.OnRewriteToCurrentServer = onAction;
-        }
-
-        public void OnRewriteToDifferentHost(Action<string, string> onAction)
-        {
-            this.OnRewriteToDifferentServer = onAction;
-        }
-
-        public void OnRedirect(Action<string, string> onAction)
-        {
-            this.OnRedirectTo = onAction;
-        }
-
-        public void OnRewriteException(Action<string, string, HttpRequestMessage, Exception> onAction)
-        {
-            this.OnRewritingException = onAction;
+                @this = this
+            };
         }
     }
 }

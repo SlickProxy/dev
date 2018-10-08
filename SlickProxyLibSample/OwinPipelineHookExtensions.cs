@@ -2,10 +2,10 @@
 
 namespace SlickProxyLibSample
 {
+    using Owin;
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Owin;
 
     public static class OwinPipelineHookExtensions
     {

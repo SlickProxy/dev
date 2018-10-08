@@ -13,6 +13,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlickProxyLib", "SlickProxy
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlickProxyLibSample", "SlickProxyLibSample\SlickProxyLibSample.csproj", "{67E774DE-B555-4701-B30B-C1ACC422F3D5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleProxyServer", "SampleProxyServer\SampleProxyServer.csproj", "{EEEFA83C-7A8E-412D-A2B4-F9C47424BD42}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "QA", "QA", "{F41E3B7C-277A-435C-BAF5-2DC3E3E30984}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{DFF2EAC7-F0DD-480C-8B55-9829968BA533}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlickProxyLibTests", "SlickProxyLibTests\SlickProxyLibTests.csproj", "{48DDF093-3185-4EC9-86D9-B2098E415AC8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlickProxyLibTestServerLib", "SlickProxyLibTestServerLib\SlickProxyLibTestServerLib.csproj", "{8DC1E57E-1D2D-4C1C-B912-E1FFF06470A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleHttpsServer", "SampleHttpsServer\SampleHttpsServer.csproj", "{0AD3E2E2-5645-4B3A-984C-D73E800882DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,9 +39,32 @@ Global
 		{67E774DE-B555-4701-B30B-C1ACC422F3D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67E774DE-B555-4701-B30B-C1ACC422F3D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67E774DE-B555-4701-B30B-C1ACC422F3D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEEFA83C-7A8E-412D-A2B4-F9C47424BD42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEEFA83C-7A8E-412D-A2B4-F9C47424BD42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEEFA83C-7A8E-412D-A2B4-F9C47424BD42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEEFA83C-7A8E-412D-A2B4-F9C47424BD42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48DDF093-3185-4EC9-86D9-B2098E415AC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48DDF093-3185-4EC9-86D9-B2098E415AC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48DDF093-3185-4EC9-86D9-B2098E415AC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48DDF093-3185-4EC9-86D9-B2098E415AC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DC1E57E-1D2D-4C1C-B912-E1FFF06470A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DC1E57E-1D2D-4C1C-B912-E1FFF06470A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DC1E57E-1D2D-4C1C-B912-E1FFF06470A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DC1E57E-1D2D-4C1C-B912-E1FFF06470A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AD3E2E2-5645-4B3A-984C-D73E800882DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AD3E2E2-5645-4B3A-984C-D73E800882DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AD3E2E2-5645-4B3A-984C-D73E800882DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AD3E2E2-5645-4B3A-984C-D73E800882DC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{67E774DE-B555-4701-B30B-C1ACC422F3D5} = {DFF2EAC7-F0DD-480C-8B55-9829968BA533}
+		{EEEFA83C-7A8E-412D-A2B4-F9C47424BD42} = {DFF2EAC7-F0DD-480C-8B55-9829968BA533}
+		{48DDF093-3185-4EC9-86D9-B2098E415AC8} = {F41E3B7C-277A-435C-BAF5-2DC3E3E30984}
+		{8DC1E57E-1D2D-4C1C-B912-E1FFF06470A4} = {F41E3B7C-277A-435C-BAF5-2DC3E3E30984}
+		{0AD3E2E2-5645-4B3A-984C-D73E800882DC} = {DFF2EAC7-F0DD-480C-8B55-9829968BA533}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5EA86CD8-0744-40F3-9EBD-82805D13D7B6}
