@@ -17,7 +17,7 @@ namespace SampleProxyServer
             settings.OnRewriteStarted((from, to, sameServer) => { Console.WriteLine($"Started from {from} to {to} ..."); });
             settings.OnRewriteEnded((from, to) => { Console.WriteLine($"Ended from {from} to {to} ..."); });
 
-            app.UseSlickProxy(handle => handle.RemoteProxyWhenAny("https://localhost:44305"), settings);
+            app.UseSlickProxy(handle => handle.RemoteProxyWhenAny("https://localhost:44306"), settings);
         }
     }
 }

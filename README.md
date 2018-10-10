@@ -1,4 +1,8 @@
-[![NuGet version](https://badge.fury.io/nu/slickproxy.svg)](https://badge.fury.io/nu/slickproxy)  For .NETFramework 4.5 and higher
+[![NuGet version](https://badge.fury.io/nu/slickproxy.svg)](https://badge.fury.io/nu/slickproxy)  
+
+[![Build status](https://dev.azure.com/slickproxy/SlickProxy/_apis/build/status/SlickProxy-ASP.NET-CI)](https://dev.azure.com/slickproxy/SlickProxy/_build/latest?definitionId=1)
+
+For .NETFramework 4.5 and higher
 
 
             var settings = new SlickProxySettings
