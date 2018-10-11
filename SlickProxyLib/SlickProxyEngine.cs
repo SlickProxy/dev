@@ -137,6 +137,10 @@
                                     {
                                       ServicePointManager.SecurityProtocol = settings.SecurityProtocolType.Value;
                                     }
+                                    else
+                                    {
+                                        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                                    }
 
                                     HttpResponseMessage response = await request.SendAsync( requestInfo.Method,from, requestInfo.RewriteToUrl, requestInfo.Settings.OnRewritingException, requestInfo.Settings.OnRespondingFromRemoteServer);
                                     context.Response.StatusCode = (int)response.StatusCode;

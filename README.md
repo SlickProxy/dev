@@ -5,7 +5,7 @@
 For .NETFramework 4.5 and higher
 
 
-            var settings = new SlickProxySettings
+var settings = new SlickProxySettings
             {
                 CaseSensitive = false,
                 RouteSameServerRewritesOverNetwork = false
@@ -34,3 +34,5 @@ For .NETFramework 4.5 and higher
                         { "" };
                     handle.When("/scene(.*)", req => list.Contains(req.QueryStringValueByName("link")), req => $"{req.BaseAddressWithScheme}");
                 },settings);
+
+            
