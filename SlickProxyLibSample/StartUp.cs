@@ -66,12 +66,12 @@ namespace SlickProxyLibSample
             //this will run regardless of any previous match
             settings.RequireAuthenticationWhen(req => req.PathAndQuery.Contains("wooo"));
             //requestuest.When(request => request.Scheme == "http", request => request.RedirectTo(request.AsHttps));
-            settings.OnRewriteStarted((from, to, sameServer) => { Console.WriteLine($"Started from {from} to {to} ..."); });
-            settings.OnRedirect((from, to) => { Console.WriteLine($"Redirecting from {from} to {to} ..."); });
-            settings.OnRewriteEnded((from, to) => { Console.WriteLine($"Ended from {from} to {to} ..."); });
-            settings.OnRewriteToCurrentHost((from, to) => { Console.WriteLine($"Rewritten to current server from {from} to {to} ..."); });
-            settings.OnRewriteException((from, to, requestMessage, error) => { Console.WriteLine($"Error when rewriting from {from} to {to} gave error ..." + error); });
-            settings.OnResponseFromRemoteServer((from, to, requestMessage, responseMessage, exception, message) => { Console.WriteLine($"When rewriting from {from} to {to} {message} , gave error ..." + exception + $" content {responseMessage.Content.ReadAsStringAsync().Result}"); });
+            settings.OnRewriteStarted((from, to, method, sameServer) => { Console.WriteLine($"Started from {from} to {to} ..."); });
+            settings.OnRedirect((from, to, method) => { Console.WriteLine($"Redirecting from {from} to {to} ..."); });
+            settings.OnRewriteEnded((from, to, method) => { Console.WriteLine($"Ended from {from} to {to} ..."); });
+            settings.OnRewriteToCurrentHost((from, to, method) => { Console.WriteLine($"Rewritten to current server from {from} to {to} ..."); });
+            settings.OnRewriteException((from, to, method, requestMessage, error) => { Console.WriteLine($"Error when rewriting from {from} to {to} gave error ..." + error); });
+            settings.OnResponseFromRemoteServer((from, to, method, requestMessage, responseMessage, exception, message) => { Console.WriteLine($"When rewriting from {from} to {to} {message} , gave error ..." + exception + $" content {responseMessage.Content.ReadAsStringAsync().Result}"); });
             settings.OnNoMatch(from => { Console.WriteLine($"No match for  {from} "); });
             settings.OnAllowed(from => { Console.WriteLine($"No match for  {from} "); });
 

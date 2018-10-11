@@ -8,12 +8,12 @@
     {
         private static void Main(string[] args)
         {
-            string httpLocalhost = "http://127.0.0.1:9900";
+            string httpLocalhost = "http://localhost:9900";
             string query = "http://localhost:9900/api/values/getall";
             using (WebApp.Start<StartUp>(httpLocalhost))
             {
                 Console.WriteLine("Press [enter] to quit...");
-                //Process.Start(query);
+                Process.Start(httpLocalhost);
                 Console.ReadLine();
             }
         }

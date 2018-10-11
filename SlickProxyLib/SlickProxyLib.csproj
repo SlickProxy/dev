@@ -47,6 +47,7 @@
     <Compile Include="ProxyObject.cs" />
     <Compile Include="ProxyObjectWithPath.cs" />
     <Compile Include="QueryStringParam.cs" />
+    <Compile Include="ResponseInspection.cs" />
     <Compile Include="SlickProxyEngine.cs" />
     <Compile Include="SlickProxySettings.cs" />
   </ItemGroup>

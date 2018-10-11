@@ -158,6 +158,7 @@
                 OnProcessingEnded = settings.OnProcessingEnded,
                 OnRewritingStarted = settings.OnRewritingStarted,
                 OnRouteBlocking = settings.OnRouteBlocking,
+                CollectRequestResponse = settings.CollectRequestResponse,
 
                 @this = this
             };
