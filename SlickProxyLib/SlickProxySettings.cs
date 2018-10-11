@@ -1,6 +1,8 @@
 ﻿namespace SlickProxyLib
 {
     using System;
+    using System.Collections.Generic;
+    using System.Net;
     using System.Net.Http;
     using System.Text.RegularExpressions;
 
@@ -8,7 +10,7 @@
     {
         internal Action RequireAuthenticationWhenRouting;
         internal Action RequireAuthenticationWhenRouting2;
-
+        public SecurityProtocolType? SecurityProtocolType { set; get; }
         internal OwinAppRequestInformation @this { get; set; }
 
         public bool RouteSameServerRewritesOverNetwork { get; set; }
@@ -33,6 +35,13 @@
         internal Action<string, string,string, HttpRequestMessage, HttpResponseMessage, Exception, string> OnRespondingFromRemoteServer { get; set; }
 
         internal Action<string> OnRouteBlocking { get; set; }
+
+        internal  Action<string,string,string,HttpResponseMessage> BeforeResponding { get; set; }
+
+        public void  OnBeforeResponding(Action<string, string, string, HttpResponseMessage> action)
+        {
+            BeforeResponding = action;
+        }
 
         public void RequireAuthenticationWhen(string regexMatch)
         {
@@ -68,6 +77,11 @@
             this.OnProcessingEnded = onAction;
         }
 
+        /// <summary>
+        /// Setting this will double the request to the remote server
+        /// </summary>
+        /// <param name="onAction"></param>
+        [Obsolete("WARNING : Setting this will double the request to the remote server!")]
         public void OnInspectRequestResponse(Action<ResponseInspection> onAction)
         {
             this.CollectRequestResponse = onAction;

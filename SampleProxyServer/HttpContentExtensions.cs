@@ -9,7 +9,7 @@
 
     public static class HttpContentExtensions
     {
-        public static void SaveResponseToFile(this ResponseInspection inspection)
+        public static void SaveResponsesToFolder(this ResponseInspection inspection, string directory, string defaultFileNameWithExtension,  params Tuple<string,string>[] fileTypeFromContentType )
         {
             if (inspection.StatusCode != HttpStatusCode.OK)
                 return;
@@ -21,27 +21,25 @@
                     var path = uri.PathAndQuery.Split('?')[0].Trim();
                     if (string.IsNullOrEmpty(path) || path == "/" || path == "\\" || path.EndsWith("/")|| path.EndsWith("\\"))
                     {
-                        path += "/index.html";
+                        path += "/"+defaultFileNameWithExtension;
                     }
                     else if (!path.Contains("."))
                     {
-                        if (inspection.ContentType == "text/html")
+                        foreach (Tuple<string, string> tuple in fileTypeFromContentType)
                         {
-                            path = path + ".html";
-                        }
-                        else if (inspection.ContentType == "application/json")
-                        {
-                            path = path + ".json";
+                            if (tuple.Item1 == inspection.ContentType && !path.ToLower().EndsWith(tuple.Item2.ToLower()))
+                            {
+                                path = path + tuple.Item2;
+                            }
                         }
                     }
 
-                    var fullPath = "Z://DownloadSite" + path;
+                    var fullPath = directory + path;
                     var fileObj = new FileInfo(fullPath);
                     if (!Directory.Exists(fileObj.Directory.FullName))
                     {
                         Directory.CreateDirectory(fileObj.Directory.FullName);
                     }
-
                     await inspection.HttpContent.ReadAsFileAsync(fullPath, true);
                     return true;
                 }).Result;
@@ -66,7 +64,7 @@
                             return;
 
                         string text = File.ReadAllText(filename);
-                        text = text.Replace("http://www.abc.com", "");
+                        text = text.Replace("forums.asp.net", "");
                         File.WriteAllText(filename, text);
                     });
             }

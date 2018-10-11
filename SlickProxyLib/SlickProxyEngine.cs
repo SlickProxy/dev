@@ -133,10 +133,10 @@
 
                                     requestInfo.Settings.OnRewriteToDifferentServer?.Invoke(from, requestInfo.RewriteToUrl, requestInfo.Method);
 
-                                    ServicePointManager.SecurityProtocol = 
-                                        //SecurityProtocolType.Tls |
-                                        SecurityProtocolType.Ssl3 |
-                                        SecurityProtocolType.Tls12;
+                                    if (settings.SecurityProtocolType != null)
+                                    {
+                                      ServicePointManager.SecurityProtocol = settings.SecurityProtocolType.Value;
+                                    }
 
                                     HttpResponseMessage response = await request.SendAsync( requestInfo.Method,from, requestInfo.RewriteToUrl, requestInfo.Settings.OnRewritingException, requestInfo.Settings.OnRespondingFromRemoteServer);
                                     context.Response.StatusCode = (int)response.StatusCode;
@@ -146,9 +146,10 @@
                                     else{
                                         context.Response.ContentType = response.Content.Headers.ContentType.MediaType;
                                     }
-                                       
-                                    await response.Content.CopyToAsync(requestInfo.ResponseBody);
-
+                                    
+                                     requestInfo.Settings.BeforeResponding?.Invoke(from, requestInfo.RewriteToUrl, requestInfo.Method, response);
+                                     await response.Content.CopyToAsync(requestInfo.ResponseBody);
+                                    
                                     if (requestInfo.Settings.CollectRequestResponse != null)
                                     {
                                         var  requestCopy = OwinRequestToHttpRequestMessage(requestInfo);
