@@ -160,7 +160,8 @@
                 OnRouteBlocking = settings.OnRouteBlocking,
                 CollectRequestResponse = settings.CollectRequestResponse,
                 BeforeResponding = settings.BeforeResponding,
-
+                LoadBalanceList = settings.LoadBalanceList,
+                LoadBalanceEnabled = settings.LoadBalanceEnabled,
                 @this = this
             };
         }

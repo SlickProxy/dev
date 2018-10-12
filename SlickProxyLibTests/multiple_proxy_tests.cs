@@ -1,10 +1,10 @@
 ﻿namespace SlickProxyLibTests
 {
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using SlickProxyLib;
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using SlickProxyLib;
 
     [TestClass]
     public class multiple_proxy_tests
@@ -20,27 +20,31 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort, otherPort1, otherPort2, otherPort3, otherPort4 },
-                handle =>
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
                 {
-                    handle.When(
-                        "proxyToOther1/(.*)",
-                        "proxyToOther1/(.*)",
-                        request => $"http://localhost:{otherPort1}/api/" + request.Part(1));
+                    handle =>
+                    {
+                        handle.When(
+                            "proxyToOther1/(.*)",
+                            "proxyToOther1/(.*)",
+                            request => $"http://localhost:{otherPort1}/api/" + request.Part(1));
 
-                    handle.When(
-                        "proxyToOther2/(.*)",
-                        "proxyToOther2/(.*)",
-                        request => $"http://localhost:{otherPort2}/api/" + request.Part(1));
+                        handle.When(
+                            "proxyToOther2/(.*)",
+                            "proxyToOther2/(.*)",
+                            request => $"http://localhost:{otherPort2}/api/" + request.Part(1));
 
-                    handle.When(
-                        "proxyToOther3/(.*)",
-                        "proxyToOther3/(.*)",
-                        request => $"http://localhost:{otherPort3}/api/" + request.Part(1));
+                        handle.When(
+                            "proxyToOther3/(.*)",
+                            "proxyToOther3/(.*)",
+                            request => $"http://localhost:{otherPort3}/api/" + request.Part(1));
 
-                    handle.When(
-                        "proxyToOther4/(.*)",
-                        "proxyToOther4/(.*)",
-                        request => $"http://localhost:{otherPort4}/api/" + request.Part(1));
+                        handle.When(
+                            "proxyToOther4/(.*)",
+                            "proxyToOther4/(.*)",
+                            request => $"http://localhost:{otherPort4}/api/" + request.Part(1));
+                    }
                 },
                 (client, servers) =>
                 {

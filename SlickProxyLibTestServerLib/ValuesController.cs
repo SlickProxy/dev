@@ -1,17 +1,17 @@
 ﻿namespace SlickProxyLibTestServerLib
 {
-    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
     using System.Net.Http;
     using System.Threading.Tasks;
     using System.Web.Http;
+    using Newtonsoft.Json;
 
     public class ValuesController : ApiController
     {
         internal static Dictionary<int, Dictionary<HttpMethod, Dictionary<string, RequestConstruct>>> RequestResponseDefinition = new Dictionary<int, Dictionary<HttpMethod, Dictionary<string, RequestConstruct>>>();
 
-        private Task<HttpResponseMessage> Process(Func<RequestConstruct> operation, HttpRequestMessage request)
+        Task<HttpResponseMessage> Process(Func<RequestConstruct> operation, HttpRequestMessage request)
         {
             RequestConstruct result = operation();
             return Task.FromResult(request.CreateResponse(result.ResponseStatusCode, result.Response));

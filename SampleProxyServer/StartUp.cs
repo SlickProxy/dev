@@ -17,19 +17,26 @@ namespace SampleProxyServer
         {
             var settings = new SlickProxySettings();
 
-            app.UseSlickProxy(handle => handle.RemoteProxyWhenAny("https://forums.asp.net"), settings);
+            app.UseSlickProxy(handle => handle.RemoteProxyWhenAny("http://lettuce.ancorathemes.com"), settings);
+            settings.LoadBalancer(enabled: true,routeTable: new[]
+            {
+                new LoadBalance("google.com","stackoverflow.com","abc.com")
+            });
+
             settings.OnRewriteStarted((from, to, method, sameServer) => Console.WriteLine($"Started {method} from {from} to {to} ..."));
             settings.OnRewriteEnded((from, method, to) => Console.WriteLine($"Ended  {method}  from {from} to {to} ..."));
             settings.SecurityProtocolType = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls12;
             settings.OnBeforeResponding(
                 (from, to, method, responseMessage) =>
                 {
-                    // responseMessage.Content.Headers.ContentType.MediaType == "text/html"
-                    if (to.EndsWith(".html"))
+                    var mediaType = responseMessage.Content.Headers.ContentType.MediaType;
+                    var isHtml = mediaType == "text/html";
+                    if (isHtml)
                     {
                         string text = responseMessage.Content.ReadAsStringAsync().Result;
-                        text.Replace("https://", "");
+                        text=text.Replace("lettuce.ancorathemes.com", "localhost:9900");
                         responseMessage.Content = new StringContent(text);
+                        responseMessage.Content.Headers.ContentType.MediaType= mediaType;
                     }
                 });
             settings.OnInspectRequestResponse(

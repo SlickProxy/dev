@@ -57,8 +57,37 @@
                         {
                             when(requestInfo);
 
+                            //handle forwarding
                             if (requestInfo.ProxyObject.Forwarding != null)
                                 requestInfo.RewriteToUrl = $"{requestInfo.ProxyObject.Forwarding}{requestInfo.PathAndQuery}";
+
+                            //handle load balancing
+                            if (settings.LoadBalanceEnabled &&settings.LoadBalanceList!=null && settings.LoadBalanceList.Count>0)
+                            {
+                                var loadBalanceSetting= settings.LoadBalanceList.FirstOrDefault(x =>
+                                {
+                                    return x.Mapping.Count(y =>
+                                    {
+                                        return requestInfo.RewriteToUrl.StartsWith(y.Host);
+                                    }) > 0;
+                                });
+
+                                if (loadBalanceSetting != null)
+                                {
+                                    //pick one with least request
+                                    var settn = loadBalanceSetting.Mapping.Aggregate((i1, i2) => i1.AccessCount < i2.AccessCount ? i1 : i2);
+                                    settn.AccessCount++;
+                                    var host = settn.Host;
+                                  
+                                    var startsWith=  loadBalanceSetting.Mapping.FirstOrDefault(y => requestInfo.RewriteToUrl.StartsWith(y.Host))?.Host;
+
+                                    if (startsWith != null)
+                                    {
+                                        requestInfo.RewriteToUrl = host+ requestInfo.RewriteToUrl.Remove(0, startsWith.Length);
+                                    }
+                                }
+                            }
+
 
                             if (requestInfo.RequireAuthentication && !(context.Authentication.User.Identities.FirstOrDefault()?.IsAuthenticated ?? false))
                             {
@@ -140,7 +169,7 @@
                                     if (!string.IsNullOrEmpty(requestInfo.ResponseContentHeadersContentType))
                                         context.Response.ContentType = requestInfo.ResponseContentHeadersContentType;
                                     else
-                                        context.Response.ContentType = response.Content.Headers.ContentType.MediaType;
+                                        context.Response.ContentType = response.Content.Headers?.ContentType?.MediaType?? context.Response.ContentType;
 
                                     requestInfo.Settings.BeforeResponding?.Invoke(from, requestInfo.RewriteToUrl, requestInfo.Method, response);
                                     await response.Content.CopyToAsync(requestInfo.ResponseBody);
@@ -149,7 +178,7 @@
                                     {
                                         HttpRequestMessage requestCopy = OwinRequestToHttpRequestMessage(requestInfo);
                                         HttpResponseMessage responseCopy = await requestCopy.SendAsync(requestInfo.Method, from, requestInfo.RewriteToUrl, requestInfo.Settings.OnRewritingException, requestInfo.Settings.OnRespondingFromRemoteServer);
-                                        requestInfo.Settings.CollectRequestResponse.Invoke(new ResponseInspection(from, requestInfo.RewriteToUrl, responseCopy.StatusCode, context.Response.ContentType, responseCopy.Content));
+                                        requestInfo.Settings.CollectRequestResponse.Invoke(new ResponseInspection(from, requestInfo.RewriteToUrl, responseCopy.StatusCode, context.Response.ContentType, responseCopy));
                                     }
 
                                     requestInfo.Settings.OnProcessingEnded?.Invoke(from, requestInfo.RewriteToUrl, requestInfo.Method);

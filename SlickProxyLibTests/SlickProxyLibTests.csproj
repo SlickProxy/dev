@@ -47,6 +47,7 @@
     <Compile Include="test_template.cs" />
     <Compile Include="when_routing_from_proxy_to_a_second_server.cs" />
     <Compile Include="when_slick_proxy_is_used.cs" />
+    <Compile Include="when_using_loadbalancer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

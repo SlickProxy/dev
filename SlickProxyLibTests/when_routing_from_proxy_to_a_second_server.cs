@@ -1,10 +1,10 @@
 ﻿namespace SlickProxyLibTests
 {
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using SlickProxyLib;
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using SlickProxyLib;
 
     [TestClass]
     public class when_routing_from_proxy_to_a_second_server
@@ -19,7 +19,8 @@
                     await TestHelper.Run(
                         new List<int>
                             { proxyPort, otherPort },
-                        handle => { setup(proxyPort, otherPort, handle); },
+                        new SlickProxySettings[] { },
+                        new Action<OwinAppRequestInformation>[] { handle => { setup(proxyPort, otherPort, handle); } },
                         (client, servers) =>
                         {
                             string resultOther = client.GetStringAsync($"http://localhost:{otherPort}/api/values/GetAll").Result;
@@ -43,12 +44,16 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort, otherPort },
-                handle =>
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
                 {
-                    handle.When(
-                        "proxyToOther/(.*)",
-                        "proxyToOther/(.*)",
-                        request => $"http://localhost:{otherPort}/api/" + request.Part(1));
+                    handle =>
+                    {
+                        handle.When(
+                            "proxyToOther/(.*)",
+                            "proxyToOther/(.*)",
+                            request => $"http://localhost:{otherPort}/api/" + request.Part(1));
+                    }
                 },
                 (client, servers) =>
                 {

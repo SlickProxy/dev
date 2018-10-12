@@ -1,19 +1,19 @@
 ﻿namespace SlickProxyLibTestServerLib
 {
-    using Microsoft.Owin.Hosting;
-    using Newtonsoft.Json;
-    using Owin;
     using System;
     using System.Collections.Generic;
     using System.Net;
     using System.Net.Http;
     using System.Net.Sockets;
+    using Microsoft.Owin.Hosting;
+    using Newtonsoft.Json;
+    using Owin;
 
     public class TestServer : IDisposable
     {
-        private static readonly Lazy<TestServer> Lazy = new Lazy<TestServer>(() => new TestServer());
+        static readonly Lazy<TestServer> Lazy = new Lazy<TestServer>(() => new TestServer());
 
-        private TestServer()
+        TestServer()
         {
             this.Servers = new Dictionary<int, ServerSetUp>();
         }

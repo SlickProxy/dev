@@ -1,10 +1,10 @@
 ﻿namespace SlickProxyLibTests
 {
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using SlickProxyLib;
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using SlickProxyLib;
 
     [TestClass]
     public class when_slick_proxy_is_used
@@ -16,7 +16,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When("(.*)", request => request.RespondWithString("hello")); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When("(.*)", request => request.RespondWithString("hello")); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/values/GetAll").Result;
@@ -35,7 +39,8 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.WhenAny(request => request.RespondWithString("hello")); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[] { handle => { handle.WhenAny(request => request.RespondWithString("hello")); } },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/values/GetAll").Result;
@@ -54,7 +59,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When(request => request.HasNoQueryString(), request => request.RespondWithString("hello")); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When(request => request.HasNoQueryString(), request => request.RespondWithString("hello")); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api").Result;
@@ -70,7 +79,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When(request => request.QueryStringContainsName("name"), request => request.RespondWithString("hello")); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When(request => request.QueryStringContainsName("name"), request => request.RespondWithString("hello")); }
+                },
                 (client, servers) =>
                 {
                     Assert.ThrowsException<AggregateException>(() => client.GetStringAsync($"http://localhost:{proxyPort}/api").Result);
@@ -86,7 +99,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.Part(0))); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.Part(0))); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/path/to/resource?name=sam&data=fun").Result;
@@ -101,7 +118,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.Part(1))); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.Part(1))); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/path/to/resource?name=sam&data=fun").Result;
@@ -116,7 +137,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.Part(2))); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.Part(2))); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/path/to/resource?name=sam&data=fun").Result;
@@ -131,7 +156,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.Part(3))); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.Part(3))); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/path/to/resource?name=sam&data=fun").Result;
@@ -146,7 +175,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.Scheme)); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.Scheme)); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/path/to/resource?name=sam&data=fun").Result;
@@ -161,7 +194,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.Path)); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.Path)); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/path/to/resource?name=sam&data=fun").Result;
@@ -176,7 +213,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.PathAndQuery)); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.PathAndQuery)); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/path/to/resource?name=sam&data=fun").Result;
@@ -191,7 +232,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.PartWithPattern("api/path/(.*)", 0))); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.PartWithPattern("api/path/(.*)", 0))); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/path/to/resource?name=sam&data=fun").Result;
@@ -206,7 +251,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.PartWithPattern("api/path/(.*)", 1))); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.PartWithPattern("api/path/(.*)", 1))); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/path/to/resource?name=sam&data=fun").Result;
@@ -221,7 +270,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.PartWithSourceAndPattern("http://localhost:77/api/path/to2/resource2?name2=sam2&data2=fun2", "api/path/(.*)", 1))); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.PartWithSourceAndPattern("http://localhost:77/api/path/to2/resource2?name2=sam2&data2=fun2", "api/path/(.*)", 1))); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/path/to/resource?name=sam&data=fun").Result;
@@ -236,7 +289,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.AsHttps)); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.AsHttps)); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/path/to/resource?name=sam&data=fun").Result;
@@ -251,7 +308,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.BaseAddressWithScheme)); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.BaseAddressWithScheme)); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/path/to/resource?name=sam&data=fun").Result;
@@ -266,7 +327,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.BaseAddressWithoutScheme)); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.BaseAddressWithoutScheme)); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/path/to/resource?name=sam&data=fun").Result;
@@ -281,7 +346,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.ExtensionlessWithExtension("html"))); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.ExtensionlessWithExtension("html"))); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/path/to/resource?name=sam&data=fun").Result;
@@ -296,7 +365,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.ExtensionlessWithExtension("wooo"))); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.ExtensionlessWithExtension("wooo"))); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/path/to/resource?name=sam&data=fun").Result;
@@ -311,7 +384,11 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort },
-                handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.ExtensionlessWithExtension("wooo"))); },
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[]
+                {
+                    handle => { handle.When("(.*)", "api/(.*)/(.*)/(.*)", request => request.RespondWithString(request.ExtensionlessWithExtension("wooo"))); }
+                },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/path/to/resource.html?name=sam&data=fun").Result;
@@ -328,7 +405,8 @@
             await TestHelper.Run(
                 new List<int>
                     { proxyPort, remotePort },
-                handle => handle.RemoteProxyWhenAny($"http://localhost:{remotePort}"),
+                new SlickProxySettings[] { },
+                new Action<OwinAppRequestInformation>[] { handle => handle.RemoteProxyWhenAny($"http://localhost:{remotePort}") },
                 (client, servers) =>
                 {
                     string result = client.GetStringAsync($"http://localhost:{proxyPort}/api/values/GetAll").Result;

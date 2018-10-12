@@ -30,7 +30,7 @@
                     var fileObj = new FileInfo(fullPath);
                     if (!Directory.Exists(fileObj.Directory.FullName))
                         Directory.CreateDirectory(fileObj.Directory.FullName);
-                    await inspection.HttpContent.ReadAsFileAsync(fullPath, true);
+                    await inspection.HttpResponseMessage.Content.ReadAsFileAsync(fullPath, true);
                     return true;
                 }).Result;
         }

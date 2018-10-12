@@ -5,13 +5,13 @@
 
     public class ResponseInspection
     {
-        public ResponseInspection(string from, string to, HttpStatusCode statusCode, string contentType, HttpContent httpContent)
+        public ResponseInspection(string from, string to, HttpStatusCode statusCode, string contentType, HttpResponseMessage httpContent)
         {
             this.From = from;
             this.To = to;
             this.StatusCode = statusCode;
             this.ContentType = contentType;
-            this.HttpContent = httpContent;
+            this.HttpResponseMessage = httpContent;
         }
 
         public string From { get; }
@@ -22,6 +22,6 @@
 
         public string ContentType { get; }
 
-        public HttpContent HttpContent { get; }
+        public HttpResponseMessage HttpResponseMessage { get; }
     }
 }

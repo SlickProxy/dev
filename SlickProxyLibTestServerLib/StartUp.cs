@@ -5,15 +5,15 @@ using SlickProxyLibTestServerLib;
 
 namespace SlickProxyLibTestServerLib
 {
+    using System.Net.Http.Formatting;
+    using System.Web.Http;
+    using System.Web.Http.Dispatcher;
+    using System.Web.Http.Routing;
     using Microsoft.Owin.FileSystems;
     using Microsoft.Owin.StaticFiles;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
     using Owin;
-    using System.Net.Http.Formatting;
-    using System.Web.Http;
-    using System.Web.Http.Dispatcher;
-    using System.Web.Http.Routing;
 
     public class StartUp
     {
@@ -37,7 +37,7 @@ namespace SlickProxyLibTestServerLib
             SetUpWebApi(app);
         }
 
-        private static void SetUpWebApi(IAppBuilder app)
+        static void SetUpWebApi(IAppBuilder app)
         {
             //app.Map(
             //    map =>
